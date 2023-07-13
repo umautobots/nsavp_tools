@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>image_meta_msgs</name>
+  <version>0.0.0</version>
+  <description>The image_meta_msgs package. Defines ROS message types for
+  per-frame streaming video metadata</description>
+
+  <author email="adbuchan@umich.edu">Austin Buchan</author>
+  <maintainer email="adbuchan@umich.edu">Austin Buchan</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>std_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+
+  <build_export_depend>std_msgs</build_export_depend>
+
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+</package>

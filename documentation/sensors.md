@@ -11,7 +11,7 @@ An overview of the stereo cameras included in the NSAVP dataset is given in the 
 | Type             | Camera Model        | Lens Model              | Stereo Baseline (meters) | FOV* (H x V) (degrees) | Resolution (W x H) | Rate (Hz) | Bit Depth (Bits) | Frame Readout |
 |------------------|---------------------|-------------------------|--------------------------|-----------------------|--------------------|-----------|------------------|---------------|
 | Monochrome       | FLIR BFS-PGE-16S2M  | Computar A4Z2812CS-MPIR | 0.90                     | 70 x 55               | 1440 x 1080        | 20.14     | 8                | Global        |
-| RGB              | FLIR BFS-PGE-50S5C  | Fujinon HF6XA-5M        | 1.00                     | 70 x 60               | 2448 x 2048        | 20.14     | 8                | Global        |
+| RGB              | FLIR BFS-PGE-50S5C  | Fujinon HF6XA-5M        | 1.00                     | 70 x 60               | 1224 x 1024 (binned)        | 20.14     | 8                | Global        |
 | Uncooled Thermal | FLIR ADK USB-C      | NA (Integrated)         | 0.64                     | 50 x 40               | 640 x 512          | 60.42     | 16               | Rolling       |
 | Event (DVS)      | Inivation DVXplorer | NA (Included)           | 1.00                     | 70 x 50               | 640 x 480          | NA        | NA               | NA            |
 

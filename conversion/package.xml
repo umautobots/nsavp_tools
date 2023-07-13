@@ -1,0 +1,19 @@
+<package format="2">
+  <name>conversion</name>
+  <version>0.0.0</version>
+  <description>Data format conversion</description>
+
+  <author email="specarmi@umich.edu">Spencer Carmichael</author>
+  <maintainer email="specarmi@umich.edu">Spencer Carmichael</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>rosbag</depend>
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>dvs_msgs</depend>
+  <depend>image_meta_msgs</depend>
+
+</package>

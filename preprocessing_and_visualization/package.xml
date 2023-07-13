@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>preprocessing_and_visualization</name>
+  <version>1.10.0</version>
+  <description> Preprocessing and visualization examples </description>
+
+  <author email="specarmi@umich.edu">Spencer Carmichael</author>
+  <maintainer email="specarmi@umich.edu">Spencer Carmichael</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>rospy</depend>
+
+</package>

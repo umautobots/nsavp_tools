@@ -1,0 +1,96 @@
+<launch>
+    <!-- ************************ Defining arguments ************************ -->
+
+    <!-- Calibration and manual measurement filepaths -->
+    <arg name="path_calibration_results" />
+    <arg name="path_measured_extrinsics" default="" />
+
+    <!-- Preprocessing parameters -->
+    <arg name="debayer" default="true" />
+    <arg name="crop_parameters_list" default="[
+        [rgb_left, 0, 0, 1224, 876],
+        [rgb_right, 0, 0, 1224, 876],
+        [dvxplorer_left, 0, 0, 640, 458],
+        [dvxplorer_right, 0, 0, 640, 458]]" />
+    <arg name="crop_raw" default="false" />
+    <arg name="rectify" default="true" />
+    <arg name="resolution_rectified" default="[]" />
+    <arg name="stereo_pairs" default="[
+        [adk_left, adk_right],
+        [mono_left, mono_right],
+        [rgb_left, rgb_right],
+        [dvxplorer_left, dvxplorer_right]]" />
+    <arg name="threshold_thermal" default="true" />
+    <arg name="threshold_thermal_minimum" default="22500" />
+    <arg name="threshold_thermal_maximum" default="25000" />
+
+    <!-- Data visualization parameters -->
+    <arg name="visualize_all_sensors" default="true" />
+    <arg name="visualize_calibrated_transforms" default="false" />
+    <arg name="visualize_stereo_rectification" default="false" />
+    <arg name="topic_image_plot" default="" />
+
+    <!-- ************************ Running nodes ************************ -->
+
+    <!-- Left event image renderer node -->
+    <node name="dvs_renderer_left" pkg="dvs_renderer" type="dvs_renderer" ns="dvxplorer_left">
+        <remap from="dvs_rendering" to="image_raw" />
+        <param name="display_method" value="red-blue" />
+    </node>
+
+    <!-- Right event image renderer node -->
+    <node name="dvs_renderer_right" pkg="dvs_renderer" type="dvs_renderer" ns="dvxplorer_right">
+        <remap from="dvs_rendering" to="image_raw" />
+        <param name="display_method" value="red-blue" />
+    </node>
+
+    <!-- Pose visualizer node -->
+    <node pkg="preprocessing_and_visualization" type="pose_visualization.py" name="pose_visualization" output="screen">
+        <param name="path_measured_extrinsics" type="str" value="$(arg path_measured_extrinsics)" />
+    </node>
+
+    <!-- RViz node (visualizing all sensor data) -->
+    <node pkg="rviz" type="rviz" name="rviz_all_sensors"
+        args="-d $(find preprocessing_and_visualization)/all_sensors.rviz"
+        if="$(arg visualize_all_sensors)" />
+
+    <!-- Image preprocessing node -->
+    <node pkg="preprocessing_and_visualization" type="image_preprocessing.py" name="image_preprocessing"
+        output="screen" required="true">
+        <param name="path_calibration_results" type="str" value="$(arg path_calibration_results)" />
+        <param name="debayer" type="bool" value="$(arg debayer)" />
+        <rosparam param="crop_parameters_list" subst_value="True">$(arg crop_parameters_list)</rosparam>
+        <param name="crop_raw" type="bool" value="$(arg crop_raw)" />
+        <param name="rectify" type="bool" value="$(arg rectify)" />
+        <rosparam param="resolution_rectified" subst_value="True">$(arg resolution_rectified)</rosparam>
+        <rosparam param="stereo_pairs" subst_value="True">$(arg stereo_pairs)</rosparam>
+        <param name="threshold_thermal" type="bool" value="$(arg threshold_thermal)" />
+        <param name="threshold_thermal_minimum" type="int" value="$(arg threshold_thermal_minimum)" />
+        <param name="threshold_thermal_maximum" type="int" value="$(arg threshold_thermal_maximum)" />
+        <param name="visualize_calibrated_transforms" type="bool" value="$(arg visualize_calibrated_transforms)" />
+    </node>
+
+    <!-- Stereo rectification visualizer node -->
+    <node pkg="preprocessing_and_visualization" type="stereo_rectification_visualization.py"
+        name="stereo_rectification_visualization" if="$(eval rectify and visualize_stereo_rectification)"
+        output="screen">
+        <param name="debayer" type="bool" value="$(arg debayer)" />
+        <rosparam param="stereo_pairs" subst_value="True">$(arg stereo_pairs)</rosparam>
+    </node>
+
+    <!-- rqt_gui node (visualizing stereo rectification) -->
+    <node pkg="rqt_gui" type="rqt_gui" name="rqt_gui"
+        args="--perspective-file $(find preprocessing_and_visualization)/stereo_rectification.perspective"
+        if="$(eval rectify and visualize_stereo_rectification)" />
+
+    <!-- RViz node (visualizing camera housing and optical frames) -->
+    <node pkg="rviz" type="rviz" name="rviz_camera_frames"
+        args="-d $(find preprocessing_and_visualization)/camera_frames.rviz"
+        if="$(eval path_measured_extrinsics != '')" />
+
+    <!-- Image plotting node -->
+    <node pkg="preprocessing_and_visualization" type="image_plotting.py" name="image_plotting"
+        if="$(eval topic_image_plot != '')" output="screen">
+        <param name="topic_image_plot" type="str" value="$(arg topic_image_plot)" />
+    </node>
+</launch>

@@ -1,0 +1,12 @@
+<launch>
+    <arg name="path_h5_in" default="" />
+    <arg name="path_bag_out" default="" />
+    <arg name="topics" default="[]"/>
+    <arg name="event_array_rate" default="20.1413"/>
+    <node name="h5_to_rosbag" pkg="conversion" type="h5_to_rosbag" output="screen" required="true" >
+        <param name="path_h5_in" type="str" value="$(arg path_h5_in)" />
+        <param name="path_bag_out" type="str" value="$(arg path_bag_out)" />
+        <rosparam param="topics" subst_value="True">$(arg topics)</rosparam>
+        <param name="event_array_rate" type="double" value="$(arg event_array_rate)" />
+    </node>
+</launch>

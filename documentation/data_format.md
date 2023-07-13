@@ -1,8 +1,8 @@
 # Data Format
 
-All sensor data is provided in the [HDF5](https://www.hdfgroup.org/solutions/hdf5/) file format (abbreviated H5). For an introduction to the H5 file format, we recommend [this video series](https://youtube.com/playlist?list=PLPyhR4PdEeGYWHRhzmCP5stzfIha8bqVg).
+All sensor data is provided in the [HDF5](https://www.hdfgroup.org/solutions/hdf5/) file format (abbreviated H5). For an introduction to the H5 file format, we recommend [this video series](https://youtube.com/playlist?list=PLPyhR4PdEeGYWHRhzmCP5stzfIha8bqVg). We recommend using the [HDFView GUI](https://www.hdfgroup.org/downloads/hdfview/) to view the contents of the H5 files. Commandline tools `h5ls` and `h5dump` can also be used print the contents of the H5 files. See the [Setup](conversion.md#1-setup) section of the conversion documentation page for instructions to build a Docker image which contains HDFView, `h5ls`, and `h5dump`. The provided [conversion](conversion.md) scripts demonstrate reading from and writing to H5 files in C++. To work with H5 files in Python we recommend [h5py](https://www.h5py.org/) or [PyTables](https://www.pytables.org/).
 
-Extrinsic and intrinsic calibration information is provided as [YAML](https://yaml.org/) files.
+Extrinsic and intrinsic sensor information is provided as [YAML](https://yaml.org/) files.
 
 A summary of the files provided for each sequence is given in the table below:
 
@@ -16,7 +16,7 @@ A summary of the files provided for each sequence is given in the table below:
 | `<sequence_prefix>_rgb_right.h5`                                  | Right RGB                    | FLIR BFS-PGE-50S5C  |
 | `<sequence_prefix>_dvxplorer_left.h5`                             | Left Event (DVS)             | Inivation DVXplorer |
 | `<sequence_prefix>_dvxplorer_right.h5`                            | Right Event (DVS)            | Inivation DVXplorer |
-| `<sequence_prefix>_applanix_right.h5`                             | Ground Truth Pose            | Applanix POS LV 420 |
+| `<sequence_prefix>_applanix.h5`                             | Ground Truth Pose            | Applanix POS LV 420 |
 | `<sequence_prefix>_<calibration_prefix>_calibration_results.yaml` | Camera Calibration Results   | NA                  |
 | `<sequence_prefix>_<measured_prefix>_measured_extrinsics.yaml`    | Manually Measured Extrinsics | NA                  |
 
@@ -33,9 +33,9 @@ The `<sequence_prefix>` is a unique identifier for the sequence, e.g. `R0_FA0`, 
         - `N`: Night
     - `<subcategory_index>`: Subcategory index, used to denote multiple sequences driven on the same route, in the same direction, and under the same lighting condition, i.e. an index that counts within the subcategory defined by the route index, direction symbol, and lighting condition symbol
 
-> Note: the initial uploaded sample sequences are additionally denoted with `_sample` in the `<sequence_prefix>`.
+> Note: the initially uploaded sample sequences are additionally denoted with `_sample` in the `<sequence_prefix>`. It is not recommended to use these sample sequences as subsequent sequences include less camera vibration and far fewer frame drops.
 
-The `<calibration_prefix>`, e.g. `C0`, and `<measured_prefix>`, e.g. `M0`, contain indices denoting which calibration sequence / measurement session the values were derived from.
+The `<calibration_prefix>`, e.g. `C0`, and `<measured_prefix>`, e.g. `M0`, contain indices denoting which calibration sequence / measurement session the values were derived from. Calibration sequences are also provided and include the same files as a standard sequence with the exception of the `<sequence_prefix>_applanix.h5` file. The frame rates are also lower in the calibration sequences.
 
 ## 1. General Sensor Data H5 Format
 
@@ -49,7 +49,7 @@ All sensor data was originally collected as a ROS1 rosbag and was converted to H
 - Where applicable, units or descriptors are written as H5 scalar attributes attached to H5 datasets (e.g. the H5 dataset `/image_raw/timestamps` will have an attribute named `units` with value `nanoseconds`).
 - The first dimension of each H5 dataset indexes across messages and chunking is performed along the first dimension only. Additionally, any two chunked datasets from the same message have the same chunk size along the first dimension such that data from all message fields can be read in as full chunks.
 
-We recommend using the [HDFView GUI](https://www.hdfgroup.org/downloads/hdfview/) to view the contents of the H5 files. Commandline tools `h5ls` and `h5dump` can also be used print the contents of the H5 files.
+We provide a script for converting the H5 files back to the ROS1 rosbag format. See the section [Converting H5 Files to a ROS1 Rosbag File](conversion.md#4-converting-h5-files-to-a-ros1-rosbag-file) in the conversion documentation page.
 
 ## 2. Sensor Specific Data Format and Characteristics
 
@@ -60,7 +60,7 @@ The uncooled thermal camera data files, `*_adk_left.h5` and `*_adk_right.h5`, co
     - `height`, `width`, `encoding`, `is_bigendian`, `step`: Attributes for constant messages fields.
     - `images`: A three dimensional dataset (messages x rows x columns) of raw (distorted) thermal images. Note that the firmware version we use with our ADK cameras embeds telemetry information in the first four pixels of the first row in the image. After extracting this information we write the value of the fifth pixel to the first four.
     - `timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds.
-- `image_meta`: A group, derived from `image_meta_msgs/ImageMeta` messages (a custom message type), including multiple one dimensional datasets of various image metadata parameters. In particular, this includes:
+- `image_meta`: A group, derived from [image_meta_msgs/ImageMeta](../image_meta_msgs/msg/ImageMeta.msg) messages (a custom message type), including multiple one dimensional datasets of various image metadata parameters. In particular, this includes:
     - `driver_timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds. Note that each timestamp matches exactly with the image the metadata corresponds to, but matches may not always exist due to some corresponding messages being dropped on one topic but not the other.
     - `ffc_flags`: A one dimensional dataset of hexadecimal codes where the least significant digit indicates whether a flat field correction (FFC) is not being performed (0x0000), imminent (0x0001), in progress (0x0002), or complete (0x0003). Note that the thermal images are not valid during a FFC.
 
@@ -71,11 +71,11 @@ The monochrome camera data files, `*_mono_left.h5` and `*_mono_right.h5`, contai
     - `height`, `width`, `encoding`, `is_bigendian`, `step`: Attributes for constant messages fields
     - `images`: A three dimensional dataset (messages x rows x columns) of raw (distorted) monochrome images.
     - `timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds.
-- `image_meta`: A group, derived from `image_meta_msgs/ImageMeta` messages (a custom message type), including multiple one dimensional datasets of various image metadata parameters. In particular, this includes:
+- `image_meta`: A group, derived from [image_meta_msgs/ImageMeta](../image_meta_msgs/msg/ImageMeta.msg) messages (a custom message type), including multiple one dimensional datasets of various image metadata parameters. In particular, this includes:
     - `driver_timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds. Note that each timestamp matches exactly with the image the metadata corresponds to, but matches may not always exist due to some corresponding messages being dropped on one topic but not the other.
     - `exposure_time_us`: A one dimensional dataset of exposure times in microseconds.
     - `gain`: A one dimensional dataset of gain values in dB.
-- `cam_diags`: A group, derived from `image_meta_msgs/CameraDiagnostics` messages (a custom message type), including multiple one dimensional datasets of various camera diagnostic parameters polled in between image acquisitions.
+- `cam_diags`: A group, derived from [image_meta_msgs/CameraDiagnostics](../image_meta_msgs/msg/CameraDiagnostics.msg) messages (a custom message type), including multiple one dimensional datasets of various camera diagnostic parameters polled in between image acquisitions.
 - Configuration information written as attributes to the root group `/`. This includes nearly all camera parameters readable through the Spinnaker SDK.
 
 ### 2.3. RGB
@@ -85,11 +85,11 @@ The RGB camera data files, `*_rgb_left.h5` and `*_rgb_right.h5`, contain the fol
     - `height`, `width`, `encoding`, `is_bigendian`, `step`: Attributes for constant messages fields
     - `images`: A three dimensional dataset (messages x rows x columns) of raw (distorted) bayer encoded RGB images.
     - `timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds.
-- `image_meta`: A group, derived from `image_meta_msgs/ImageMeta` messages (a custom message type), including multiple one dimensional datasets of various image metadata parameters. In particular, this includes:
+- `image_meta`: A group, derived from [image_meta_msgs/ImageMeta](../image_meta_msgs/msg/ImageMeta.msg) messages (a custom message type), including multiple one dimensional datasets of various image metadata parameters. In particular, this includes:
     - `driver_timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds. Note that each timestamp matches exactly with the image the metadata corresponds to, but matches may not always exist due to some corresponding messages being dropped on one topic but not the other.
     - `exposure_time_us`: A one dimensional dataset of exposure times in microseconds.
     - `gain`: A one dimensional dataset of gain values in dB.
-- `cam_diags`: A group, derived from `image_meta_msgs/CameraDiagnostics` messages (a custom message type), including multiple one dimensional datasets of various camera diagnostic parameters polled in between image acquisitions.
+- `cam_diags`: A group, derived from [image_meta_msgs/CameraDiagnostics](../image_meta_msgs/msg/CameraDiagnostics.msg) messages (a custom message type), including multiple one dimensional datasets of various camera diagnostic parameters polled in between image acquisitions.
 - Configuration information written as attributes to the root group `/`. This includes nearly all camera parameters readable through the Spinnaker SDK.
 
 ### 2.4. Event (DVS)

@@ -1,0 +1,16 @@
+<launch>
+    <arg name="path_base_folder" default="" />
+    <arg name="filepath_h5_out" default="" />
+    <arg name="filepaths_h5_in" default="[]"/>
+    <arg name="remove_prefix" default="true"/>
+    <arg name="symbolic" default="true"/>
+    <arg name="relative" default="true"/>
+    <node name="h5_combine" pkg="conversion" type="h5_combine" output="screen" required="true" >
+        <param name="path_base_folder" type="str" value="$(arg path_base_folder)" />
+        <param name="filepath_h5_out" type="str" value="$(arg filepath_h5_out)" />
+        <rosparam param="filepaths_h5_in" subst_value="True">$(arg filepaths_h5_in)</rosparam>
+        <param name="remove_prefix" type="bool" value="$(arg remove_prefix)" />
+        <param name="symbolic" type="bool" value="$(arg symbolic)" />
+        <param name="relative" type="bool" value="$(arg relative)" />
+    </node>
+</launch>

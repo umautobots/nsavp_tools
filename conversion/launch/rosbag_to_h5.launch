@@ -1,0 +1,12 @@
+<launch>
+    <arg name="path_bag_in" default="" />
+    <arg name="path_h5_folder_out" default="" />
+    <arg name="prefix" default="" />
+    <arg name="topics" default="[]"/>
+    <node name="rosbag_to_h5" pkg="conversion" type="rosbag_to_h5" output="screen" required="true" >
+        <param name="path_bag_in" type="str" value="$(arg path_bag_in)" />
+        <param name="path_h5_folder_out" type="str" value="$(arg path_h5_folder_out)" />
+        <param name="prefix" type="str" value="$(arg prefix)" />
+        <rosparam param="topics" subst_value="True">$(arg topics)</rosparam>
+    </node>
+</launch>

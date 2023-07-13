@@ -1,0 +1,5 @@
+bool get_all
+bool iterate_selectors
+string[] prop_names
+---
+CameraDiagnostics config

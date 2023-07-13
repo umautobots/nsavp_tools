@@ -1,0 +1,52 @@
+FROM osrf/ros:noetic-desktop-full
+
+# Install apt dependencies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
+	apt-get install -y \
+	git python3-pip
+
+# Install python dependencies
+RUN pip3 install pygeodesy scipy
+
+# Clone event camera driver and checkout specific commit to ensure future consistency
+RUN git clone https://github.com/uzh-rpg/rpg_dvs_ros.git && \
+    cd /rpg_dvs_ros/ && \
+    git checkout 95f08d565c3115b181a4763e1e350f4df0375c4b
+
+# Create catkin workspace
+RUN mkdir -p /catkin_ws/src/
+
+# Clone in catkin_simple (used to build event packages) to the catkin workspace and checkout specific commit to ensure
+# future consistency
+RUN cd /catkin_ws/src/ && \
+	git clone https://github.com/catkin/catkin_simple.git && \
+	cd catkin_simple/ && \
+	git checkout 0e62848b12da76c8cc58a1add42b4f894d1ac21e
+
+# Copy in preprocessing_and_visualization and image_meta_msgs package
+COPY preprocessing_and_visualization/ /catkin_ws/src/preprocessing_and_visualization/
+COPY image_meta_msgs/ /catkin_ws/src/image_meta_msgs/
+
+# Add symlink to event message and rendering packages
+RUN ln -s /rpg_dvs_ros/dvs_msgs/ /catkin_ws/src/ && \
+	ln -s /rpg_dvs_ros/dvs_renderer/ /catkin_ws/src/
+
+# Clone in rviz_satellite to the catkin workspace and checkout specific commit to ensure future consistency
+RUN cd /catkin_ws/src/ && \
+	git clone https://github.com/nobleo/rviz_satellite.git && \
+	cd rviz_satellite/ && \
+	git checkout 65bae6b8332f4d2269b77bd331bce66c2158886f
+
+# Install missing rviz_satellite ROS dependencies
+RUN cd /catkin_ws && \
+	rosdep install --from-paths src --ignore-src -r -y
+
+# Build ros packages
+SHELL ["/bin/bash", "-c"]
+RUN source /opt/ros/noetic/setup.bash && \
+	cd /catkin_ws && \
+    catkin_make
+
+# Source ROS setup.bash script and built packages on login
+RUN echo "source /opt/ros/noetic/setup.bash" >> /root/.bashrc && \
+	echo "source /catkin_ws/devel/setup.bash" >> /root/.bashrc
