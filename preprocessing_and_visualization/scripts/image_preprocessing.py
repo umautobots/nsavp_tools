@@ -81,17 +81,17 @@ def unpack_rotation_and_translation(message_transform_stamped):
     return translation, rotation_matrix
 
 def unpack_calibration_info(info_calibration):
-    distortion_coefficients_0 = np.array(info_calibration['distortion_coeffs'])
-    intrinsics_0 = info_calibration['intrinsics']
-    camera_matrix_0 = np.eye(3)
-    camera_matrix_0[0, 0] = intrinsics_0[0]
-    camera_matrix_0[1, 1] = intrinsics_0[1]
-    camera_matrix_0[0, 2] = intrinsics_0[2]
-    camera_matrix_0[1, 2] = intrinsics_0[3]
-    resolution_0 = info_calibration['resolution']
-    distortion_model_0 = info_calibration['distortion_model']
+    distortion_coefficients = np.array(info_calibration['distortion_coeffs'])
+    intrinsics = info_calibration['intrinsics']
+    camera_matrix = np.eye(3)
+    camera_matrix[0, 0] = intrinsics[0]
+    camera_matrix[1, 1] = intrinsics[1]
+    camera_matrix[0, 2] = intrinsics[2]
+    camera_matrix[1, 2] = intrinsics[3]
+    resolution = info_calibration['resolution']
+    distortion_model = info_calibration['distortion_model']
 
-    return distortion_coefficients_0, camera_matrix_0, resolution_0, distortion_model_0
+    return distortion_coefficients, camera_matrix, resolution, distortion_model
 
 def generate_camera_info_messages(camera_parameters_dict, data_calibrated, key_camera_0, key_camera_1 = None):
     # Unpack camera calibration info of the first camera

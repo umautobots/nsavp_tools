@@ -1,5 +1,5 @@
-#ifndef H5TOROSMESSAGEWRITER_H
-#define H5TOROSMESSAGEWRITER_H
+#ifndef H5TOCOMMONWRITER_H
+#define H5TOCOMMONWRITER_H
 
 #include <string>
 #include <map>
@@ -7,40 +7,35 @@
 #include <cassert>
 #include <iostream>
 
-#include <rosbag/bag.h>
-
 #include "h5_io/H5UtilityFunctions.h"
 
 /**
- * Base class for writing ROS messages from a H5 group.
+ * Base class for writing data in common formats from a H5 group.
  */
-class H5ToRosMessageWriter
+class H5ToCommonWriter
 {
 public:
 
     /**
-     * Creates a H5 to ROS message writer.
+     * Creates a H5 to common message writer.
      *
      * @param[out] group A single-topic H5 group.
      *
      * @pre The group must be open
      */
-    H5ToRosMessageWriter(H5::Group& group);
+    H5ToCommonWriter(H5::Group& group);
 
     /************************ public member functions ************************/
 
     /**
-     * Pure virtual function implemented by message-specific derived classes to write single-topic h5 groups to the
-     * rosbag.
+     * Pure virtual function implemented by message-specific derived classes to write single-topic h5 groups to a
+     * common format.
      *
-     * @param[in] topic The topic to write messages on.
-     * @param[in] bag The rosbag to write messages to.
+     * @param[in] path_output The path to the file or folder the data will be output to.
      *
-     * @pre The bag must be open and writable.
+     * @pre The namespace level folder must already exist.
      */
-    virtual void writeH5TopicGroup(
-        const std::string topic,
-        rosbag::Bag& bag) = 0;
+    virtual void writeH5TopicGroup(const std::string path_output) = 0;
 
 protected:
     /************************ protected member functions ************************/
@@ -218,4 +213,4 @@ private:
     std::map<std::string, hsize_t> indices_message_;
 };
 
-#endif //ROSMESSAGETOH5WRITER_H
+#endif //H5TOCOMMONWRITER_H

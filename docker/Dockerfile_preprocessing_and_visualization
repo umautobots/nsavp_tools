@@ -3,7 +3,7 @@ FROM osrf/ros:noetic-desktop-full
 # Install apt dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
 	apt-get install -y \
-	git python3-pip
+	git python3-pip python3-tk
 
 # Install python dependencies
 RUN pip3 install pygeodesy scipy

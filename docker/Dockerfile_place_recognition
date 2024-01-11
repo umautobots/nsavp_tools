@@ -1,0 +1,28 @@
+FROM tensorflow/tensorflow:2.11.0-gpu
+
+# Install dependencies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
+	apt-get install -y \
+    python3-pip \
+    git \
+    wget \
+    python3-tk \
+    libgl1
+
+RUN pip3 install scipy tqdm opencv-python-headless matplotlib screeninfo dearpygui pygeodesy pyyaml
+
+# Clone NetVLAD and checkout specific commit to ensure future consistency
+# NOTE: this is a fork of a NetVLAD python port which has been updated for tensorflow 2
+RUN git clone https://github.com/QVPR/netvlad_tf_open.git && \
+    cd /netvlad_tf_open/ && \
+    git checkout d0444a6bd7ba047a23fa294bd75131ced84839cd
+
+# Download and extract NetVLAD checkpoint and move the contents to the checkpoints folder
+RUN wget http://rpg.ifi.uzh.ch/datasets/netvlad/vd16_pitts30k_conv5_3_vlad_preL2_intra_white.zip && \
+    unzip vd16_pitts30k_conv5_3_vlad_preL2_intra_white.zip && \
+    mv vd16_pitts30k_conv5_3_vlad_preL2_intra_white/* /netvlad_tf_open/checkpoints/
+
+# Add NetVLAD code to the python path in .bashrc
+RUN echo "export PYTHONPATH=/netvlad_tf_open/python/:\$PYTHONPATH" >> /root/.bashrc
+
+COPY place_recognition/ /place_recognition

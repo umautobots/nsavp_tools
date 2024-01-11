@@ -1,0 +1,8 @@
+<launch>
+    <arg name="path_bag_1" default="" />
+    <arg name="path_bag_2" default="" />
+    <node name="rosbag_validator" pkg="conversion" type="rosbag_validator" output="screen" required="true" >
+        <param name="path_bag_1" type="str" value="$(arg path_bag_1)" />
+        <param name="path_bag_2" type="str" value="$(arg path_bag_2)" />
+    </node>
+</launch>

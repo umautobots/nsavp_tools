@@ -66,5 +66,13 @@ void H5ToRosEventsWriter::writeH5TopicGroup(
         message_count += n_messages_read;
         std::cout << "\33[2K\rPercent completion: " << 100.0 * message_count / n_messages_ << std::flush;
     }
+
+    // Write out final EventArray
+    if (message_event_array.events.size() > 0)
+    {
+        message_event_array.header.stamp = message_event_array.events.back().ts;
+        bag.write(topic, message_event_array.header.stamp, message_event_array);
+    }
+
     std::cout << "\33[2K\rPercent completion: " << 100.0 << std::flush << std::endl;
 }

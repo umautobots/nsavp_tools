@@ -19,7 +19,7 @@ namespace rosbag
 }
 
 /**
- * Base class for writing ROS messages to an H5 file.
+ * Base class for writing ROS messages to a H5 file.
  */
 class RosMessageToH5Writer
 {

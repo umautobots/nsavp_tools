@@ -1,0 +1,10 @@
+<launch>
+    <arg name="path_h5_in" default="" />
+    <arg name="path_folder_out" default="" />
+    <arg name="topics" default="[]"/>
+    <node name="h5_to_common" pkg="conversion" type="h5_to_common" output="screen" required="true" >
+        <param name="path_h5_in" type="str" value="$(arg path_h5_in)" />
+        <param name="path_folder_out" type="str" value="$(arg path_folder_out)" />
+        <rosparam param="topics" subst_value="True">$(arg topics)</rosparam>
+    </node>
+</launch>

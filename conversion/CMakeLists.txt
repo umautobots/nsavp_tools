@@ -12,11 +12,13 @@ find_package(catkin REQUIRED COMPONENTS
   image_meta_msgs)
 
 find_package(HDF5 REQUIRED COMPONENTS CXX)
+find_package(OpenCV REQUIRED)
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${HDF5_INCLUDE_DIRS})
+  ${HDF5_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS})
 
 set(HEADERS
   include/h5_io/H5UtilityFunctions.h
@@ -35,7 +37,14 @@ set(HEADERS
   include/h5_io/ros_to_h5/RosConfigurationToH5Writer.h
   include/h5_io/ros_to_h5/RosPoseStampedToH5Writer.h
   include/h5_io/ros_to_h5/compression/CompressionMethod.h
-  include/h5_io/ros_to_h5/compression/GzipCompressionMethod.h)
+  include/h5_io/ros_to_h5/compression/GzipCompressionMethod.h
+  include/h5_io/h5_to_common/H5ToCommonWriter.h
+  include/h5_io/h5_to_common/H5ToCommonCameraDiagnosticsWriter.h
+  include/h5_io/h5_to_common/H5ToCommonConfigurationWriter.h
+  include/h5_io/h5_to_common/H5ToCommonEventsWriter.h
+  include/h5_io/h5_to_common/H5ToCommonImageMetaWriter.h
+  include/h5_io/h5_to_common/H5ToCommonImageWriter.h
+  include/h5_io/h5_to_common/H5ToCommonPoseStampedWriter.h)
 
 set(SOURCES
   src/h5_io/H5UtilityFunctions.cpp
@@ -53,7 +62,14 @@ set(SOURCES
   src/h5_io/ros_to_h5/RosCameraDiagnosticsToH5Writer.cpp
   src/h5_io/ros_to_h5/RosConfigurationToH5Writer.cpp
   src/h5_io/ros_to_h5/RosPoseStampedToH5Writer.cpp
-  src/h5_io/ros_to_h5/compression/GzipCompressionMethod.cpp)
+  src/h5_io/ros_to_h5/compression/GzipCompressionMethod.cpp
+  src/h5_io/h5_to_common/H5ToCommonWriter.cpp
+  src/h5_io/h5_to_common/H5ToCommonCameraDiagnosticsWriter.cpp
+  src/h5_io/h5_to_common/H5ToCommonConfigurationWriter.cpp
+  src/h5_io/h5_to_common/H5ToCommonEventsWriter.cpp
+  src/h5_io/h5_to_common/H5ToCommonImageMetaWriter.cpp
+  src/h5_io/h5_to_common/H5ToCommonImageWriter.cpp
+  src/h5_io/h5_to_common/H5ToCommonPoseStampedWriter.cpp)
 
 catkin_package(
   CATKIN_DEPENDS rosbag roscpp rospy sensor_msgs dvs_msgs image_meta_msgs
@@ -62,10 +78,16 @@ catkin_package(
 add_library(${PROJECT_NAME}_LIB ${SOURCES} ${HEADERS})
 
 add_executable(rosbag_to_h5 src/RosbagToH5.cpp)
-target_link_libraries(rosbag_to_h5 ${PROJECT_NAME}_LIB ${catkin_LIBRARIES} ${HDF5_LIBRARIES})
+target_link_libraries(rosbag_to_h5 ${PROJECT_NAME}_LIB ${catkin_LIBRARIES} ${HDF5_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(h5_combine src/H5Combine.cpp)
-target_link_libraries(h5_combine ${PROJECT_NAME}_LIB ${catkin_LIBRARIES} ${HDF5_LIBRARIES})
+target_link_libraries(h5_combine ${PROJECT_NAME}_LIB ${catkin_LIBRARIES} ${HDF5_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(h5_to_rosbag src/H5ToRosbag.cpp)
-target_link_libraries(h5_to_rosbag ${PROJECT_NAME}_LIB ${catkin_LIBRARIES} ${HDF5_LIBRARIES})
+target_link_libraries(h5_to_rosbag ${PROJECT_NAME}_LIB ${catkin_LIBRARIES} ${HDF5_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(rosbag_validator src/RosbagValidator.cpp)
+target_link_libraries(rosbag_validator ${PROJECT_NAME}_LIB ${catkin_LIBRARIES} ${HDF5_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(h5_to_common src/H5ToCommon.cpp)
+target_link_libraries(h5_to_common ${PROJECT_NAME}_LIB ${catkin_LIBRARIES} ${HDF5_LIBRARIES} ${OpenCV_LIBRARIES})

@@ -27,3 +27,11 @@
 - Initial code release with corresponding documentation.
     - Conversion
     - Preprocessing and visualization
+
+# 2024-01-11
+
+- Place recognition tutorial code and documentation released.
+- Conversion code and documentation updated to support conversion from a H5 file to CSV and PNG files.
+- Rosbag validator added to the conversion package.
+- README updated with a link to the new project page.
+- Small corrections made to existing code and documentation.

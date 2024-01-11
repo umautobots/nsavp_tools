@@ -1,22 +1,22 @@
 # Data Format
 
-All sensor data is provided in the [HDF5](https://www.hdfgroup.org/solutions/hdf5/) file format (abbreviated H5). For an introduction to the H5 file format, we recommend [this video series](https://youtube.com/playlist?list=PLPyhR4PdEeGYWHRhzmCP5stzfIha8bqVg). We recommend using the [HDFView GUI](https://www.hdfgroup.org/downloads/hdfview/) to view the contents of the H5 files. Commandline tools `h5ls` and `h5dump` can also be used print the contents of the H5 files. See the [Setup](conversion.md#1-setup) section of the conversion documentation page for instructions to build a Docker image which contains HDFView, `h5ls`, and `h5dump`. The provided [conversion](conversion.md) scripts demonstrate reading from and writing to H5 files in C++. To work with H5 files in Python we recommend [h5py](https://www.h5py.org/) or [PyTables](https://www.pytables.org/).
+All sensor data is provided in the [HDF5](https://www.hdfgroup.org/solutions/hdf5/) file format (abbreviated H5). For an introduction to the H5 file format, we recommend [this video series](https://youtube.com/playlist?list=PLPyhR4PdEeGYWHRhzmCP5stzfIha8bqVg). We recommend using the [HDFView GUI](https://www.hdfgroup.org/downloads/hdfview/) to view the contents of the H5 files. Commandline tools `h5ls` and `h5dump` can also be used to print the contents of the H5 files. See the [Setup](conversion.md#1-setup) section of the conversion documentation page for instructions to build a Docker image which contains HDFView, `h5ls`, and `h5dump`. The provided [conversion](conversion.md) scripts demonstrate reading from and writing to H5 files in C++. To work with H5 files in Python we recommend [h5py](https://www.h5py.org/) or [PyTables](https://www.pytables.org/). The provided [place recognition tutorial](place_recognition.md) demonstrates reading from the H5 files with h5py.
 
-Extrinsic and intrinsic sensor information is provided as [YAML](https://yaml.org/) files.
+Extrinsic and intrinsic cailbration information is provided as [YAML](https://yaml.org/) files.
 
 A summary of the files provided for each sequence is given in the table below:
 
 | Filename                                                          | Description                  | Sensor Model        |
 |-------------------------------------------------------------------|------------------------------|---------------------|
-| `<sequence_prefix>_adk_left.h5`                                   | Left Uncooled Thermal        | FLIR ADK USB-C      |
-| `<sequence_prefix>_adk_right.h5`                                  | Right Uncooled Thermal       | FLIR ADK USB-C      |
+| `<sequence_prefix>_adk_left.h5`                                   | Left Uncooled Thermal        | FLIR 40640U050-6PAAX|
+| `<sequence_prefix>_adk_right.h5`                                  | Right Uncooled Thermal       | FLIR 40640U050-6PAAX|
 | `<sequence_prefix>_mono_left.h5`                                  | Left Monochrome              | FLIR BFS-PGE-16S2M  |
 | `<sequence_prefix>_mono_right.h5`                                 | Right Monochrome             | FLIR BFS-PGE-16S2M  |
 | `<sequence_prefix>_rgb_left.h5`                                   | Left RGB                     | FLIR BFS-PGE-50S5C  |
 | `<sequence_prefix>_rgb_right.h5`                                  | Right RGB                    | FLIR BFS-PGE-50S5C  |
 | `<sequence_prefix>_dvxplorer_left.h5`                             | Left Event (DVS)             | Inivation DVXplorer |
 | `<sequence_prefix>_dvxplorer_right.h5`                            | Right Event (DVS)            | Inivation DVXplorer |
-| `<sequence_prefix>_applanix.h5`                             | Ground Truth Pose            | Applanix POS LV 420 |
+| `<sequence_prefix>_applanix.h5`                                   | Ground Truth Pose            | Applanix POS LV 420 |
 | `<sequence_prefix>_<calibration_prefix>_calibration_results.yaml` | Camera Calibration Results   | NA                  |
 | `<sequence_prefix>_<measured_prefix>_measured_extrinsics.yaml`    | Manually Measured Extrinsics | NA                  |
 
@@ -40,10 +40,10 @@ The `<calibration_prefix>`, e.g. `C0`, and `<measured_prefix>`, e.g. `M0`, conta
 ## 1. General Sensor Data H5 Format
 
 All sensor data was originally collected as a ROS1 rosbag and was converted to H5 files using the following strategy:
-- An H5 file is created for each topic's namespace with filename `<sequence_prefix>_<namespace>`, with forward slashes replaced by underscores in nested namespaces (e.g. `/mono_left/image_raw` is written to `<sequence_prefix>_mono_left.h5` and `/adk/left/image_raw` is written to `<sequence_prefix>_adk_left.h5`).
+- A H5 file is created for each topic's namespace with filename `<sequence_prefix>_<namespace>.h5`, with forward slashes replaced by underscores in nested namespaces (e.g. `/mono_left/image_raw` is written to `<sequence_prefix>_mono_left.h5` and `/adk/left/image_raw` is written to `<sequence_prefix>_adk_left.h5`).
 - If available, sensor configuration information is attached to the H5 root group `/` as H5 scalar attributes.
-- H5 groups are created for each topic's name (e.g. the topic `/mono_left/image_raw` is written to the H5 group `/image_raw` in the `<sequence_prefix>_mono_left.h5` file) and the message type of the topic is attached as a H5 scalar attribute to this group (e.g. the H5 group `/image_raw` has an H5 attribute named `ros_message_type` with value `sensor_msgs/Image`).
-- Constant message fields are written as H5 scalar attributes attached to their corresponding H5 group (e.g. the `height` field of a `sensor_msgs/Image` message on the topic `/mono_left/image_raw` is written as an H5 attribute named `height` attached to the `/image_raw` H5 group).
+- H5 groups are created for each topic's name (e.g. the topic `/mono_left/image_raw` is written to the H5 group `/image_raw` in the `<sequence_prefix>_mono_left.h5` file) and the message type of the topic is attached as a H5 scalar attribute to this group (e.g. the H5 group `/image_raw` has a H5 attribute named `ros_message_type` with value `sensor_msgs/Image`).
+- Constant message fields are written as H5 scalar attributes attached to their corresponding H5 group (e.g. the `height` field of a `sensor_msgs/Image` message on the topic `/mono_left/image_raw` is written as a H5 attribute named `height` attached to the `/image_raw` H5 group).
 - Variable message fields are written as H5 datasets in their corresponding H5 groups using descriptive names that do not necessarily match the message field name (e.g. the `data` field of a `sensor_msgs/Image` message on the topic `/mono_left/image_raw` is written to the H5 dataset `/image_raw/images`).
 - Timestamps are written in nanoseconds as unsigned 64-bit integer H5 datasets.
 - Where applicable, units or descriptors are written as H5 scalar attributes attached to H5 datasets (e.g. the H5 dataset `/image_raw/timestamps` will have an attribute named `units` with value `nanoseconds`).
@@ -61,8 +61,8 @@ The uncooled thermal camera data files, `*_adk_left.h5` and `*_adk_right.h5`, co
     - `images`: A three dimensional dataset (messages x rows x columns) of raw (distorted) thermal images. Note that the firmware version we use with our ADK cameras embeds telemetry information in the first four pixels of the first row in the image. After extracting this information we write the value of the fifth pixel to the first four.
     - `timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds.
 - `image_meta`: A group, derived from [image_meta_msgs/ImageMeta](../image_meta_msgs/msg/ImageMeta.msg) messages (a custom message type), including multiple one dimensional datasets of various image metadata parameters. In particular, this includes:
-    - `driver_timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds. Note that each timestamp matches exactly with the image the metadata corresponds to, but matches may not always exist due to some corresponding messages being dropped on one topic but not the other.
-    - `ffc_flags`: A one dimensional dataset of hexadecimal codes where the least significant digit indicates whether a flat field correction (FFC) is not being performed (0x0000), imminent (0x0001), in progress (0x0002), or complete (0x0003). Note that the thermal images are not valid during a FFC.
+    - `driver_timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds. Note that each timestamp matches exactly with the image the metadata corresponds to.
+    - `ffc_flags`: A one dimensional dataset of hexadecimal codes where the least significant digit indicates whether a flat field correction (FFC), also called a non-uniformity correction (NUC), is not being performed (0x0000), imminent (0x0001), in progress (0x0002), or complete (0x0003). When the FFC is in progress (0x0002), the camera returns duplicates of the last image captured before the FFC. We have removed these duplicate images and their corresponding meta data.
 
 ### 2.2. Monochrome
 
@@ -72,7 +72,7 @@ The monochrome camera data files, `*_mono_left.h5` and `*_mono_right.h5`, contai
     - `images`: A three dimensional dataset (messages x rows x columns) of raw (distorted) monochrome images.
     - `timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds.
 - `image_meta`: A group, derived from [image_meta_msgs/ImageMeta](../image_meta_msgs/msg/ImageMeta.msg) messages (a custom message type), including multiple one dimensional datasets of various image metadata parameters. In particular, this includes:
-    - `driver_timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds. Note that each timestamp matches exactly with the image the metadata corresponds to, but matches may not always exist due to some corresponding messages being dropped on one topic but not the other.
+    - `driver_timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds. Note that each timestamp matches exactly with the image the metadata corresponds to.
     - `exposure_time_us`: A one dimensional dataset of exposure times in microseconds.
     - `gain`: A one dimensional dataset of gain values in dB.
 - `cam_diags`: A group, derived from [image_meta_msgs/CameraDiagnostics](../image_meta_msgs/msg/CameraDiagnostics.msg) messages (a custom message type), including multiple one dimensional datasets of various camera diagnostic parameters polled in between image acquisitions.
@@ -86,7 +86,7 @@ The RGB camera data files, `*_rgb_left.h5` and `*_rgb_right.h5`, contain the fol
     - `images`: A three dimensional dataset (messages x rows x columns) of raw (distorted) bayer encoded RGB images.
     - `timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds.
 - `image_meta`: A group, derived from [image_meta_msgs/ImageMeta](../image_meta_msgs/msg/ImageMeta.msg) messages (a custom message type), including multiple one dimensional datasets of various image metadata parameters. In particular, this includes:
-    - `driver_timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds. Note that each timestamp matches exactly with the image the metadata corresponds to, but matches may not always exist due to some corresponding messages being dropped on one topic but not the other.
+    - `driver_timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds. Note that each timestamp matches exactly with the image the metadata corresponds to.
     - `exposure_time_us`: A one dimensional dataset of exposure times in microseconds.
     - `gain`: A one dimensional dataset of gain values in dB.
 - `cam_diags`: A group, derived from [image_meta_msgs/CameraDiagnostics](../image_meta_msgs/msg/CameraDiagnostics.msg) messages (a custom message type), including multiple one dimensional datasets of various camera diagnostic parameters polled in between image acquisitions.
@@ -111,7 +111,7 @@ Specifically, the file contains the following:
 - `pose_base_link`: A group, derived from [geometry_msgs/PoseStamped](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html) messages, including the following:
     - `positions`: A two dimensional dataset (messages x coordinate axes) of `base_link` positions in the ECEF frame in meters. The order of the coordinates across the columns is x, y, z.
     - `quaternions`: A two dimensional dataset (messages x quaternion components) of quaternion rotations from the `base_link` frame to the ECEF frame. The order of the components across the columns is x, y, z, w.
-    - `timestamps`: A one dimensional dataset of event TAI timestamps in nanoseconds.
+    - `timestamps`: A one dimensional dataset of TAI timestamps in nanoseconds.
 
 ## 3. Calibration Results
 

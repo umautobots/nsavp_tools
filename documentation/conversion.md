@@ -71,7 +71,7 @@ In the above examples, the groups are external links with relative paths, i.e. i
 
 # 4. Converting H5 Files to a ROS1 Rosbag File
 
-The `h5_to_rosbag` script can be used to convert an H5 file to a ROS1 rosbag file. To use the script, first combine the H5 files to be converted using `h5_combine`, as described above in [Combining H5 Files](#3-combining-h5-files), and then run this script on the resulting H5 file. Note that `h5_combine` must be used even if converting a single H5 file (e.g. `R0_FA0_mono_left.h5`) because the `h5_to_rosbag` script assumes the top level groups in the H5 file correspond to ROS namespaces (e.g. `/mono_left`) and that subgroups correspond to topics (e.g. `/mono_left/image_raw`). The script additionally assumes the subgroups are structured as described in the [General Sensor Data H5 Format](data_format.md#1-general-sensor-data-h5-format) section of the data format documentation page.
+The `h5_to_rosbag` script can be used to convert a H5 file to a ROS1 rosbag file. To use the script, first combine the H5 files to be converted using `h5_combine`, as described above in [Combining H5 Files](#3-combining-h5-files), and then run this script on the resulting H5 file. Note that `h5_combine` must be used even if converting a single H5 file (e.g. `R0_FA0_mono_left.h5`) because the `h5_to_rosbag` script assumes the top level groups in the H5 file correspond to ROS namespaces (e.g. `/mono_left`) and that subgroups correspond to topics (e.g. `/mono_left/image_raw`). The script additionally assumes the subgroups are structured as described in the [General Sensor Data H5 Format](data_format.md#1-general-sensor-data-h5-format) section of the data format documentation page.
 
 The script can be run with `h5_to_rosbag.launch`. The launch file takes the following arguments:
 - `path_h5_in`: A path specifying the H5 file to convert.
@@ -86,3 +86,22 @@ roslaunch conversion h5_to_rosbag.launch path_h5_in:=/nsavp_data/R0_FA0/R0_FA0.h
 The result would be a new rosbag file, `/nsavp_data/R0_FA0/R0_FA0.bag`, containing a topic for each subgroup in `R0_FA0.h5` (`/mono_left/image_raw`, `/mono_left/image_meta`, etc.).
 
 Note that the resulting rosbag is uncompressed and will be larger than the input H5 files combined. This is especially true of the event data, which is typically ~5 times larger in the rosbag format.
+
+# 5. Converting H5 Files to Common Formats (CSV and PNG)
+
+The `h5_to_common` script can be used to convert a H5 file to common formats (CSV and PNG files). To use the script, first combine the H5 files to be converted using `h5_combine`, as described above in [Combining H5 Files](#3-combining-h5-files), and then run this script on the resulting H5 file. Note that `h5_combine` must be used even if converting a single H5 file (e.g. `R0_FA0_mono_left.h5`) because the `h5_to_common` script assumes the top level groups in the H5 file correspond to ROS namespaces (e.g. `/mono_left`) and that subgroups correspond to topics (e.g. `/mono_left/image_raw`). The script additionally assumes the subgroups are structured as described in the [General Sensor Data H5 Format](data_format.md#1-general-sensor-data-h5-format) section of the data format documentation page.
+
+The result of the `h5_to_common` script is a folder for each namespace (e.g. `mono_left/`) that contains a file or subfolder for each processed topic or set of configuration information (e.g. the `mono_left/` folder could contain `image_raw/`, `image_meta.csv`, `cam_diags.csv`, and `config.csv`). Image topics are output as a folder of PNG files named as `<timestamp>.png` where `<timestamp>` is the integer TAI timestamp of the image in nanoseconds. All other topics are output as CSV files with a column for each H5 dataset (e.g. the `exposure_time_us` and `gain` datasets within the `image_meta` topic/group). The first row of these CSV files is a header listing the dataset name corresponding to each column. Configuration information is written to a CSV file with column headers `Name` and `Value` and a row for each configuration field. Images and units are as described in the [Data Format](data_format.md) documentation page (e.g. RGB images are raw and bayer encoded, all timestamps are TAI and in nanoseconds, etc.).
+
+The script can be run with `h5_to_common.launch`. The launch file takes the following arguments:
+- `path_h5_in`: A path specifying the H5 file to convert.
+- `path_folder_out`: A path specifying the ouput folder which will contain the CSV files and/or subfolders of PNG images.
+- `topics`: A list of topics to process in the conversion. The ROS topic names match the subgroup paths in the input H5 file (e.g. `/mono_left/image_raw`). If empty, all topics with supported message types will be processed. Defaults to an empty list `[]`.
+
+Continuing the first example given above in [Combining H5 Files](#3-combining-h5-files), the `R0_FA0.h5` file located in the folder `/nsavp_data/R0_FA0/` within the running Docker container (see [Setup](#1-setup)) can be converted to common formats with the following command:
+```
+roslaunch conversion h5_to_common.launch path_h5_in:=/nsavp_data/R0_FA0/R0_FA0.h5 path_folder_out:=/nsavp_data/R0_FA0/R0_FA0_common/
+```
+The result would be a new folder, `/nsavp_data/R0_FA0/R0_FA0_common/`, containing subfolders for each group in `R0_FA0.h5` (`mono_left/` and `mono_right/`) which themselves contain the subfolder `image_raw/` and the files `image_meta.csv`, `cam_diags.csv`, and `config.csv`.
+
+Note that the resulting folder will typically be larger than the input H5 files combined. This is especially true of the event data, which can be almost ~20 times larger in the CSV format.
