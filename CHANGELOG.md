@@ -35,3 +35,12 @@
 - Rosbag validator added to the conversion package.
 - README updated with a link to the new project page.
 - Small corrections made to existing code and documentation.
+
+# 2024-01-26
+
+- Route 1 sequences released on Deep Blue Data.
+    - R1_DA0
+    - R1_FA0
+    - R1_RA0
+- Route 0 sequences and calibration sequence 1 updated on Deep Blue Data. See the change notice in the works' descriptions on Deep Blue Data for details.
+- Preprint posted to arXiv and citation added to README.

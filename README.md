@@ -1,7 +1,5 @@
 # NSAVP
 
-**NOTE: the dataset is still under development; we plan to release one additional route. If you are interested in this addition check back and/or Watch the repository on GitHub for updates. [CHANGELOG.md](CHANGELOG.md) will be updated to record changes since the initial release.**
-
 This repository contains documentation and software tools for the Novel Sensors for Autonomous Vehicle Perception (NSAVP) dataset. See the [project page](https://umautobots.github.io/nsavp) for links to all resources, including data download.
 
 Additional information is available in the following documentation pages:
@@ -15,4 +13,12 @@ If you have any questions or comments, please create a GitHub issue.
 
 ## Citation
 
-An arXiv paper describing the details of the dataset is planned. Once it is released, this section will be updated with the citation.
+```
+@misc{nsavp2024,
+    title={Dataset and Benchmark: Novel Sensors for Autonomous Vehicle Perception},
+    author={Spencer Carmichael and Austin Buchan and Mani Ramanagopal and Radhika Ravi and Ram Vasudevan and Katherine A. Skinner},
+    year={2024},
+    eprint={2401.13853},
+    archivePrefix={arXiv},
+    primaryClass={cs.RO}}
+```
