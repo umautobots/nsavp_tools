@@ -14,11 +14,12 @@ If you have any questions or comments, please create a GitHub issue.
 ## Citation
 
 ```
-@misc{nsavp2024,
-    title={Dataset and Benchmark: Novel Sensors for Autonomous Vehicle Perception},
-    author={Spencer Carmichael and Austin Buchan and Mani Ramanagopal and Radhika Ravi and Ram Vasudevan and Katherine A. Skinner},
-    year={2024},
-    eprint={2401.13853},
-    archivePrefix={arXiv},
-    primaryClass={cs.RO}}
+@article{nsavp_2025,
+    author = {Spencer Carmichael and Austin Buchan and Mani Ramanagopal and Radhika Ravi and Ram Vasudevan and Katherine A Skinner},
+    title = {Dataset and Benchmark: Novel Sensors for Autonomous Vehicle Perception},
+    journal = {The International Journal of Robotics Research},
+    volume = {44},
+    number = {3},
+    pages = {355-365},
+    year = {2025}}
 ```
